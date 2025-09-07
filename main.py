@@ -5,7 +5,7 @@ import asyncio
 import os
 
 # -------------- CONFIG --------------
-TOKEN = "MTQxNDEyOTYwMDAwNjcyMTUzNg.G5MNB_.6W7hMa6PcpgJGEbTEIdsTMbHybg6dm_d_juOf8"  # replace with your token
+TOKEN = "temp"  # replace with your token
 PREFIX = "!"                   # only needed if you want legacy prefix commands
 INTENTS = discord.Intents.all()  # enable all intents
 GUILD_IDS = []  # optional: add guild IDs here for faster syncing
@@ -48,3 +48,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
