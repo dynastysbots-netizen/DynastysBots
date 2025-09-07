@@ -3,20 +3,35 @@ import discord
 from discord.ext import commands
 import asyncio
 import os
+from dotenv import load_dotenv
+from flask import Flask
+import threading
 
 # -------------- CONFIG --------------
-TOKEN = "temp"  # replace with your token
-PREFIX = "!"                   # only needed if you want legacy prefix commands
-INTENTS = discord.Intents.all()  # enable all intents
+load_dotenv()  # load variables from .env file
+TOKEN = os.getenv("DISCORD_TOKEN")  # .env must contain DISCORD_TOKEN=your_token_here
+PREFIX = "!"
+INTENTS = discord.Intents.all()
 GUILD_IDS = []  # optional: add guild IDs here for faster syncing
 # ------------------------------------
+
+# -------------- FLASK SERVER --------------
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return "Dynasty Bot is running!"
+
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+# ------------------------------------------
 
 class DynastyBot(commands.Bot):
     def __init__(self):
         super().__init__(
             command_prefix=PREFIX,
             intents=INTENTS,
-            application_id=None  # leave None unless needed
+            application_id=None
         )
 
     async def setup_hook(self):
@@ -47,5 +62,10 @@ async def main():
         await bot.start(TOKEN)
 
 if __name__ == "__main__":
+    # Start Flask server in background thread
+    threading.Thread(target=run_flask).start()
+
+    # Start Discord bot
     asyncio.run(main())
+
 
