@@ -1,30 +1,32 @@
-# main.py
 import discord
 from discord.ext import commands
 import asyncio
 import os
-from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, send_from_directory
 import threading
+from dotenv import load_dotenv
 
 # -------------- CONFIG --------------
-load_dotenv()  # load variables from .env file
-TOKEN = os.getenv("DISCORD_TOKEN")  # .env must contain DISCORD_TOKEN=your_token_here
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
 PREFIX = "!"
 INTENTS = discord.Intents.all()
-GUILD_IDS = []  # optional: add guild IDs here for faster syncing
+GUILD_IDS = []
 # ------------------------------------
 
-# -------------- FLASK SERVER --------------
+# Flask setup
 app = Flask(__name__)
 
 @app.route("/")
 def home():
     return "Dynasty Bot is running!"
 
+@app.route("/transcripts/<filename>")
+def transcripts(filename):
+    return send_from_directory("transcripts", filename)
+
 def run_flask():
     app.run(host="0.0.0.0", port=8080)
-# ------------------------------------------
 
 class DynastyBot(commands.Bot):
     def __init__(self):
@@ -35,13 +37,13 @@ class DynastyBot(commands.Bot):
         )
 
     async def setup_hook(self):
-        # Load all cogs from cogs folder
+        # Load cogs
         for filename in os.listdir("./cogs"):
             if filename.endswith(".py"):
                 await self.load_extension(f"cogs.{filename[:-3]}")
                 print(f"Loaded cog: {filename}")
 
-        # Sync commands (global or per-guild)
+        # Sync commands
         if GUILD_IDS:
             for guild_id in GUILD_IDS:
                 guild = discord.Object(id=guild_id)
@@ -62,10 +64,9 @@ async def main():
         await bot.start(TOKEN)
 
 if __name__ == "__main__":
-    # Start Flask server in background thread
+    # Run Flask in a separate thread
     threading.Thread(target=run_flask).start()
-
-    # Start Discord bot
     asyncio.run(main())
+
 
 
